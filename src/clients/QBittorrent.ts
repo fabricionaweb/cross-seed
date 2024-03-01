@@ -275,7 +275,7 @@ export default class QBittorrent implements TorrentClient {
 						isComplete: true,
 						autoTMM: false,
 						category: dataCategory,
-				  }
+					}
 				: await this.getTorrentConfiguration(searchee);
 
 			const newCategoryName =
@@ -285,6 +285,7 @@ export default class QBittorrent implements TorrentClient {
 
 			if (!isComplete) return InjectionResult.TORRENT_NOT_COMPLETE;
 
+			// It would require change the way it creates the links for change data match contentLayout
 			const contentLayout =
 				!path &&
 				newTorrent.isSingleFileTorrent &&
@@ -292,10 +293,16 @@ export default class QBittorrent implements TorrentClient {
 					? ContentLayout.SUBFOLDER
 					: ContentLayout.ORIGINAL;
 
+			logger.verbose({
+				label: Label.QBITTORRENT,
+				message: `Content layout is ${contentLayout}`,
+			})
+
 			const formData = new FormData();
 			formData.append("torrents", buffer, filename);
 			formData.append("tags", "cross-seed");
 			formData.append("category", newCategoryName);
+			formData.append("contentLayout", contentLayout);
 
 			if (autoTMM) {
 				formData.append("autoTMM", "true");
@@ -304,18 +311,12 @@ export default class QBittorrent implements TorrentClient {
 				formData.append("savepath", save_path);
 			}
 			if (path) {
-				formData.append("contentLayout", ContentLayout.ORIGINAL);
 				formData.append("skip_checking", skipRecheck.toString());
 				formData.append("paused", (!skipRecheck).toString());
 			} else {
-				formData.append("contentLayout", contentLayout);
 				formData.append("skip_checking", "true");
 				formData.append("paused", "false");
 			}
-
-			// for some reason the parser parses the last kv pair incorrectly
-			// it concats the value and the sentinel
-			formData.append("foo", "bar");
 
 			await this.request("/torrents/add", formData);
 
