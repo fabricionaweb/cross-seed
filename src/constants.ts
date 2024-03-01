@@ -60,3 +60,9 @@ export enum LinkType {
 	SYMLINK = "symlink",
 	HARDLINK = "hardlink",
 }
+
+export enum ContentLayout {
+	ORIGINAL = "Original",
+	SUBFOLDER = "Subfolder",
+	NO_SUBFOLDER = "NoSubfolder",
+}

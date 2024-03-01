@@ -1,5 +1,5 @@
 import { posix } from "path";
-import { InjectionResult } from "../constants.js";
+import { ContentLayout, InjectionResult } from "../constants.js";
 import { CrossSeedError } from "../errors.js";
 import { Label, logger, logOnce } from "../logger.js";
 import { Metafile } from "../parseTorrent.js";
@@ -289,8 +289,8 @@ export default class QBittorrent implements TorrentClient {
 				!path &&
 				newTorrent.isSingleFileTorrent &&
 				(await this.isSubfolderContentLayout(searchee))
-					? "Subfolder"
-					: "Original";
+					? ContentLayout.SUBFOLDER
+					: ContentLayout.ORIGINAL;
 
 			const formData = new FormData();
 			formData.append("torrents", buffer, filename);
@@ -304,7 +304,7 @@ export default class QBittorrent implements TorrentClient {
 				formData.append("savepath", save_path);
 			}
 			if (path) {
-				formData.append("contentLayout", "Original");
+				formData.append("contentLayout", ContentLayout.ORIGINAL);
 				formData.append("skip_checking", skipRecheck.toString());
 				formData.append("paused", (!skipRecheck).toString());
 			} else {
